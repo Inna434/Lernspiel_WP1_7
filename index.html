@@ -1,0 +1,131 @@
+html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Informatik-Lernspiel · Klasse 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f7;--card:#fff;--ink:#13243b;--muted:#5b6b80;--accent:#2457d6;--ok:#14804f;--okbg:#dcf5e7;--bad:#a8480a;--badbg:#fdebd0;--line:#d3dce8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a2b;--card:#17253a;--ink:#e8eef7;--muted:#9fb0c6;--accent:#7aa2ff;--ok:#5fd69a;--okbg:#12382a;--bad:#f0b35c;--badbg:#3a2a10;--line:#2a3b55}}
+:root[data-theme="dark"]{--bg:#0f1a2b;--card:#17253a;--ink:#e8eef7;--muted:#9fb0c6;--accent:#7aa2ff;--ok:#5fd69a;--okbg:#12382a;--bad:#f0b35c;--badbg:#3a2a10;--line:#2a3b55}
+html{height:100%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:18px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif;padding:16px}
+main{max-width:660px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+h1{font-size:1.15rem;margin:0}
+.score{font-weight:700;font-size:1.15rem}
+.score small{color:var(--muted);font-weight:400}
+.segs{display:grid;grid-template-columns:repeat(30,1fr);gap:3px;margin-bottom:18px}
+.segs i{height:8px;border-radius:2px;background:var(--line)}
+.segs i.s2{background:var(--ok)}.segs i.s1{background:var(--bad)}.segs i.s0{background:var(--muted)}
+.segs i.cur{outline:2px solid var(--accent);outline-offset:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.n{color:var(--muted);margin:0 0 6px}
+h2{font-size:1.3rem;line-height:1.35;margin:0 0 16px}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;color:inherit;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt.ok{background:var(--okbg);border-color:var(--ok);font-weight:700}
+.opt.bad{background:var(--badbg);border-color:var(--bad);text-decoration:line-through;color:var(--muted)}
+.opt:disabled{cursor:default}
+.opt.dim{opacity:.55}
+.fb{margin-top:16px;padding:14px;border-radius:10px;border-left:6px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.bad{background:var(--badbg);border-color:var(--bad)}
+.fb b{display:block;margin-bottom:2px}
+.btn{font:inherit;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 22px;cursor:pointer;margin-top:16px}
+:root[data-theme="dark"] .btn{color:#0f1a2b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0f1a2b}}
+.end{text-align:center}
+.big{font-size:3rem;font-weight:700;margin:4px 0}
+.hd{display:flex;gap:14px;align-items:flex-start}.ico{font-size:2.2rem;line-height:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;flex:none}.dg{margin:0 0 16px}.dg svg{width:100%;max-width:360px;height:auto;display:block}
+@media (max-width:480px){body{font-size:17px;padding:12px}.card{padding:16px}}
+@media (prefers-reduced-motion:no-preference){.fb{animation:pop .25s ease-out}@keyframes pop{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><h1>Informatik-Lernspiel · Klasse 7</h1><div class="score" aria-live="polite">Punkte: <span id="pts">0</span> <small id="max"></small></div></div>
+  <div class="segs" id="segs" aria-hidden="true"></div>
+  <section class="card" id="card"></section>
+</main>
+<script>
+// [Frage, richtig, falsch1, falsch2, falsch3, Hinweis, Fakt]
+const Q=[
+["Wofür steht das EVA-Prinzip?","Eingabe – Verarbeitung – Ausgabe","Erfassen – Verteilen – Ablegen","Eingabe – Verbindung – Anwendung","Energie – Verbrauch – Akku","Denk an den Weg der Daten: erst rein, dann bearbeiten, dann raus.","Das EVA-Prinzip gilt vom Taschenrechner bis zum Supercomputer. Sogar eine Ampelsteuerung arbeitet so.","🔄"],
+["Aus welchen Wörtern besteht das Wort „Informatik“?","Information + Automatik","Internet + Mathematik","Information + Elektronik","Informieren + Praktik","Informatik beschäftigt sich mit der automatisierten Verarbeitung von Informationen.","Den Begriff „Informatik“ hat 1957 der deutsche Ingenieur Karl Steinbuch geprägt.","💻"],
+["Welches dieser Geräte ist ein Informatiksystem?","Geldautomat","Fahrradklingel","Holzlineal","Taschenlampe mit Schalter","Suche das Gerät, das Daten aufnimmt, nach einem Programm verarbeitet und etwas ausgibt.","Der erste Geldautomat der Welt wurde 1967 in London aufgestellt.","🏧"],
+["Was ist Software?","Das Betriebssystem","Der Router","Das Netzwerkkabel","Der Bildschirm","Software kann man nicht anfassen. Sie besteht aus Programmen.","„Hardware“ heißt wörtlich „Eisenwaren“. Der Begriff stammt aus dem Baumarkt."],
+["Welches Gerät ist eine Netzwerkkomponente?","Router","Tastatur","Lautsprecher","Maus","Gesucht ist ein Gerät, das andere Geräte verbindet und Daten weiterleitet.","Ein Router arbeitet wie eine Postverteilstelle: Er leitet Datenpakete zum richtigen Ziel.","📡"],
+["Das WLAN-Modul in einem Smartphone ist …","Hardware: ein Chip auf der Platine","Software: ein Programm","Weder Hardware noch Software","Nur ein Teil des Betriebssystems","Du kannst das Modul auf der Platine sehen und anfassen.","Oft steckt WLAN und Bluetooth im selben Chip.","📶"],
+["Welches System ist vernetzt?","Ein Saugroboter, der eine Karte aufs Handy schickt","Ein Taschenrechner","Eine digitale Küchenwaage","Eine Parkuhr, die einen Parkschein druckt","Vernetzt heißt: Das System tauscht Daten mit anderen Systemen oder dem Internet aus.","Viele Saugroboter vermessen die Wohnung mit einem rotierenden Laser.","🤖"],
+["Welches Passwort ist am sichersten?","mQ7!vP2#L9x","Sommer2026","Max2012","passwort123","Achte auf Länge und eine Mischung aus Buchstaben, Zahlen und Sonderzeichen.","„123456“ und „password“ gehören seit Jahren zu den am häufigsten benutzten Passwörtern.","🔐"],
+["Ein Zahlencode mit 4 Ziffern (0–9): Wie viele Kombinationen gibt es?","10 000","1 000","40","100 000","Formel: Zeichenanzahl^Länge. Also 10 hoch 4.","Bei 6 Ziffern sind es schon 1 000 000. Jede Stelle mehr macht es 10-mal schwerer.","🔢"],
+["Was ist die 2-Faktor-Authentifizierung (2FA)?","Passwort plus ein zweiter Nachweis, z. B. ein Code aufs Handy","Zwei verschiedene Passwörter","Das Passwort zweimal eingeben","Zwei Konten für denselben Dienst","Der Name verrät es: ein zweiter Faktor kommt zum Passwort dazu.","Selbst wenn jemand dein Passwort kennt, fehlt ihm der zweite Faktor.","📱"],
+["Alex nutzt überall dasselbe Passwort. Was ist das Problem?","Wird ein Konto gehackt, sind alle anderen auch offen","Er vergisst das Passwort schneller","Das Passwort wird zu lang","Es gibt kein Problem","Überlege, was passiert, wenn ein Online-Shop gehackt wird.","Angreifer probieren gestohlene Zugangsdaten automatisch bei vielen Diensten aus.","🔑"],
+["Welcher Dateiname ist am besten?","Referat_Hardware_Gruppe2_v03.pptx","Neu2_final_wirklichfinal.pptx","Text","Bild1","Ein guter Name beantwortet: Was ist das? Welches Thema? Welche Version?","Leerzeichen und Sonderzeichen machen auf manchen Systemen Ärger. Deshalb nimmt man Unterstriche.","📄"],
+["Was ist die älteste dieser Rechenhilfen?","Der Abakus","Die Lochkarte","Der ENIAC","Das Smartphone","Sie arbeitet ganz ohne Strom, mit Kugeln auf Stäben.","Den Abakus gibt es seit etwa 3000 v. Chr. In Asien wird er noch heute benutzt.","🧮"],
+["Wie wurde der ENIAC „programmiert“?","Durch Umstecken von Kabeln und Schaltern","Mit einer Tastatur und Maus","Mit einer App","Per Sprachbefehl","Frühe Computer hatten noch keine Programme im Speicher.","Der ENIAC wog etwa 27 Tonnen. Ein neues Programm bedeutete lange Umbauarbeiten.","🔌"],
+["Was war bei elektronischen Computern neu?","Elektronische Signale statt mechanischer Teile","Der Touchscreen","Das WLAN","Der Bildschirm","Vergleiche mit dem Abakus und mechanischen Rechenmaschinen: Was bewegt sich nicht mehr?","Der ENIAC hatte rund 18 000 Elektronenröhren.","💡"],
+["Was ist die Grundidee von John von Neumann?","Programm und Daten liegen im selben Arbeitsspeicher","Computer brauchen keinen Strom","Es gibt nur ein Rechenwerk","Programme stehen nur auf Lochkarten","Es geht um die Frage: Wo liegen die Befehle?","Von Neumann beschrieb die Idee 1945 in einem berühmten Bericht über den EDVAC.","🧠"],
+["Was macht das Steuerwerk (CU)?","Es holt Befehle und steuert den Ablauf","Es führt nur Rechnungen aus","Es speichert Daten dauerhaft","Es gibt Ton aus","Das Steuerwerk ist der Dirigent des Computers.","Steuerwerk und Rechenwerk bilden zusammen den Prozessor (CPU).","🎛️","cu"],
+["Wofür steht ALU?","Arithmetic Logic Unit, das Rechenwerk","Arbeitsspeicher Lade-Unit","Automatic Linking Unit","Application Logic Update","Die Abkürzung ist englisch. Sie gehört zum Rechenwerk.","Die ALU rechnet nicht nur, sondern vergleicht auch, z. B. ob eine Zahl größer ist.","➕"],
+["Was verbindet Arbeitsspeicher, Steuerwerk und Rechenwerk?","Das Bus-System","Der Router","Der Akkumulator","Der Switch","Es ist wie eine Straße, auf der Daten fahren.","„Bus“ kommt vom lateinischen „omnibus“: für alle.","🚌","bus"],
+["Was ist der Unterschied zwischen Mikro- und Makrobefehl?","Ein Makrobefehl fasst mehrere Mikrobefehle zusammen","Mikrobefehle sind länger","Makrobefehle gibt es nur im RAM","Es gibt keinen Unterschied","Denk an TAKE: Dahinter stecken zwei kleine Schritte.","TAKE besteht aus den Mikrobefehlen ram->db und db->acc.","🧩"],
+["Was macht TAKE 10 bei JOHNNY?","Kopiert die Zahl aus Speicherstelle 10 in den Akkumulator","Schreibt die Zahl 10 in den Speicher","Addiert 10 zum Akkumulator","Stoppt das Programm","TAKE heißt „nimm“: Etwas wird aus dem Speicher geholt.","TAKE, ADD, SAVE und HLT reichen schon für kleine Rechenprogramme.","📥"],
+["In Speicherstelle 10 steht 7, in 11 steht 5. Was steht nach TAKE 10, ADD 11, SAVE 12, HLT 0 in Speicherstelle 12?","12","7","5","2","TAKE holt die 7 in den Akku, ADD addiert die 5, SAVE schreibt das Ergebnis.","Genau so rechnet jede CPU, nur Milliarden Mal pro Sekunde.","🧾"],
+["Was macht TST 10?","Prüft den Wert: Ist er 0, wird der nächste Befehl übersprungen","Stoppt das Programm","Addiert 10","Speichert den Akku","TST testet eine Speicherstelle auf null.","TST und JMP zusammen ergeben Schleifen, die Grundlage fast jedes Programms.","❓"],
+["Was macht JMP 4?","Das Programm springt zu Adresse 4 und macht dort weiter","Der Akku wird um 4 erhöht","Der Wert 4 wird gespeichert","Das Programm wird beendet","JMP bedeutet „jump“.","Ohne Sprünge würde jedes Programm nur stur von oben nach unten laufen.","🦘"],
+["Wie kann man sich viele sichere Passwörter merken?","Mit einem Passwortmanager","Man schreibt sie auf einen Zettel am Monitor","Man nimmt überall dasselbe Passwort","Man nimmt den Namen des Haustiers","Das Gerät soll dir die Arbeit abnehmen und alles verschlüsselt speichern.","Bei einem Passwortmanager musst du dir nur ein einziges starkes Hauptpasswort merken.","🗝️"],
+["Welche Reihenfolge ist richtig (alt → neu)?","Abakus → mechanische Rechenmaschine → ENIAC → Smartphone","ENIAC → Abakus → Smartphone → mechanische Rechenmaschine","Smartphone → ENIAC → Abakus → mechanische Rechenmaschine","mechanische Rechenmaschine → Smartphone → Abakus → ENIAC","Denk an Kugeln, dann Zahnräder, dann Elektronenröhren, dann Chips.","Zwischen dem Abakus und dem Smartphone liegen rund 5000 Jahre.","⏳"],
+["Wofür nutzte man Lochkarten?","Um Informationen zu speichern und Maschinen zu steuern","Um Strom zu erzeugen","Um Bilder anzuzeigen","Um Computer zu verbinden","Ob ein Loch da ist oder nicht, ergibt eine Information.","Schon Anfang des 19. Jahrhunderts steuerte ein Webstuhl seine Muster mit Lochkarten. Später nutzten sie auch frühe Computer.","🎟️"],
+["Was konnte eine mechanische Rechenmaschine wie die Pascaline vor allem?","Mit Zahnrädern addieren und subtrahieren","E-Mails verschicken","Programme aus dem Speicher laden","Videos abspielen","Sie arbeitete ohne Strom, nur mit Zahnrädern.","Blaise Pascal baute sie um 1642 für seinen Vater, der als Steuerbeamter viel rechnen musste.","⚙️"],
+["Wo liegen bei der Von-Neumann-Architektur Programm und Daten?","Gemeinsam im Arbeitsspeicher (RAM)","Das Programm im Rechenwerk, die Daten im Steuerwerk","Das Programm im Bus, die Daten im Prozessor","Nur auf Lochkarten","Von Neumanns Idee: ein gemeinsamer Speicher für beides.","Weil Befehle wie Daten im Speicher liegen, reicht es, ein neues Programm zu laden. Umstecken ist nicht mehr nötig.","🗄️"],
+["In welcher Reihenfolge bearbeitet der Prozessor einen Befehl?","Befehl holen → verstehen → ausführen","Ausführen → holen → löschen","Speichern → drucken → holen","Rechnen → holen → verstehen","Zuerst muss das Steuerwerk den Befehl aus dem Speicher haben.","Dieser Ablauf heißt Befehlszyklus. Moderne Prozessoren schaffen ihn Milliarden Mal pro Sekunde.","🔁"]
+];
+const N=Q.length, $=id=>document.getElementById(id);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+let order,idx,score,res,tries,done;
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function start(){order=shuffle([...Array(N).keys()]);idx=0;score=0;res=[];render()}
+function bar(){const s=$("segs");s.style.gridTemplateColumns="repeat("+N+",1fr)";s.innerHTML="";for(let i=0;i<N;i++){const e=document.createElement("i");if(i<res.length)e.className="s"+res[i];else if(i===idx)e.className="cur";s.appendChild(e)}$("pts").textContent=score;$("max").textContent="/ "+N*2}
+function diagram(p){const hl=k=>k===p?'style="fill:var(--okbg);stroke:var(--ok);stroke-width:3"':'';return `<svg viewBox="0 0 300 140" role="img" aria-label="Schema eines Computers nach Von Neumann"><g fill="var(--line)" stroke="var(--muted)" stroke-width="1.5"><rect x="8" y="8" width="84" height="56" rx="6"/><rect x="118" y="8" width="174" height="76" rx="6"/><rect x="128" y="32" width="72" height="42" rx="5" ${hl("cu")}/><rect x="210" y="32" width="72" height="42" rx="5"/></g><g stroke="var(--muted)" stroke-width="2"><path d="M50 64v42M164 74v32M246 74v32"/></g><rect x="8" y="106" width="284" height="14" rx="5" fill="var(--muted)" ${p==="bus"?'style="fill:var(--ok)"':''}/><g fill="var(--ink)" font-size="11" text-anchor="middle"><text x="50" y="40">RAM</text><text x="205" y="22">Prozessor (CPU)</text><text x="164" y="57">Steuerwerk</text><text x="246" y="57">Rechenwerk</text><text x="150" y="136">Bus-System</text></g></svg>`}
+function render(){
+  bar();const card=$("card");card.innerHTML="";
+  if(idx>=N){return end(card)}
+  const q=Q[order[idx]];tries=0;done=false;
+  const hd=el("div","hd");hd.appendChild(el("div","ico",q[7]||"❓"));const tx=el("div");tx.append(el("p","n","Frage "+(idx+1)+" von "+N),el("h2","",q[0]));hd.appendChild(tx);card.appendChild(hd);
+  if(q[8]){const d=el("div","dg");d.innerHTML=diagram(q[8]);card.appendChild(d)}
+  const box=el("div","opts");const fb=el("div");fb.setAttribute("aria-live","polite");
+  shuffle([1,2,3,4]).forEach(k=>{
+    const b=el("button","opt",q[k]);b.type="button";
+    b.onclick=()=>answer(b,k===1,q,box,fb);box.appendChild(b)});
+  card.append(box,fb);
+}
+function answer(b,right,q,box,fb){
+  if(done)return;fb.innerHTML="";
+  if(right){
+    done=true;const pts=tries===0?2:tries===1?1:0;score+=pts;res.push(pts);
+    b.classList.add("ok");[...box.children].forEach(x=>{x.disabled=true;if(x!==b&&!x.classList.contains("bad"))x.classList.add("dim")});
+    const d=el("div","fb ok");d.append(el("b","","Richtig! +"+pts+(pts===1?" Punkt":" Punkte")),el("span","","Wusstest du? "+q[6]));fb.appendChild(d);
+    const n=el("button","btn",idx+1<N?"Nächste Frage":"Ergebnis ansehen");n.type="button";n.onclick=()=>{idx++;render()};fb.appendChild(n);n.focus();
+    bar();
+  }else{
+    tries++;b.classList.add("bad");b.disabled=true;
+    const d=el("div","fb bad");d.append(el("b","","Noch nicht ganz. Versuch es nochmal!"),el("span","","Tipp: "+q[5]));fb.appendChild(d);
+  }
+}
+function end(card){
+  const p=score/(N*2),msg=p>=.9?"Super, du bist bereit für die Klassenarbeit!":p>=.7?"Stark! Wiederhole noch die Fragen, bei denen du Tipps gebraucht hast.":p>=.5?"Guter Anfang. Spiel noch einmal und achte auf die Tipps.":"Schau dir die Folien nochmal an und versuche es dann erneut.";
+  const w=el("div","end");w.append(el("p","n","Geschafft!"),el("div","big",score+" / "+(N*2)),el("p","",msg),el("p","n","2 Punkte gibt es für eine richtige Antwort im ersten Versuch, 1 Punkt im zweiten."));
+  const b=el("button","btn","Nochmal spielen");b.type="button";b.onclick=start;w.appendChild(b);card.appendChild(w);b.focus();
+}
+start();
+</script>
+</body>
+</html>
